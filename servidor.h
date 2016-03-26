@@ -3,19 +3,21 @@
 
 #include "archivo.h"
 
+using namespace std;
+
 class Servidor {
 public:
     Servidor();
     ~Servidor();
     void ejecutar();
 protected:
-    Archivo archivo;
-    int descriptor;
+    vector<Archivo> archivos;
+    int mi_descriptor, otro_descriptor;
     unsigned int n;
     char *ruta;
     void inicializar();
-    void conectar();
-    void recibir(char *str);
+    void aceptar();
+    string recibir(char *str);
     void recibir_n();
     void cerrar();
 };

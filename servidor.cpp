@@ -12,45 +12,69 @@
 #define TAM_DGRAMA 100
 
 void Servidor::inicializar() {
-    descriptor = socket(AF_UNIX, SOCK_DGRAM, 0);
-    if(descriptor < 0) {
+    struct sockaddr_un local;
+    mi_descriptor = socket(AF_UNIX, SOCK_DGRAM, 0);
+    if(mi_descriptor < 0) {
         throw "error al crear socket";
+    }
+    local.sun_family = AF_UNIX;
+    strcpy(local.sun_path, SOCK_PATH);
+    unlink(local.sun_path);
+    len = strlen(local.sun_path) + sizeof(local.sun_family);
+    if (bind(s, (struct sockaddr *)&local, len) < 0) {
+        throw "error al registrar";
+    }
+    if (listen(s, 5) < 0) {
+        throw "error al escuchar"
     }
 }
 
-Servidor::Servidor(const char *filename, unsigned int n) {
-    archivo = Archivo(filename, O_RDONLY);
-    this->n = n;
+Servidor::Servidor() {
     inicializar();
 }
 
 Servidor::~Servidor() {
     archivo.cerrar();
-    close(descriptor);
+    close(mi_descriptor);
 }
 
-void Servidor::conectar() {
-}
-
-void Servidor::recibir(char *str) {
-    if(send(descriptor, str, strlen(str), 0) < 0) {
-        throw "error al recibir";
+void Servidor::aceptar() {
+    struct sockaddr_un remoto;
+    int len;
+    len = sizeof(remoto);
+    otro_descriptor = accept(mi_descriptor, (struct sockaddr*) &remoto, &len);
+    if (otro_descriptor < 0) {
+        throw "error al aceptar"
     }
 }
+
+char* Servidor::recibir() {
+    char buffer[TAM_DGRAMA];
+    if(recv(otro_descriptor, buffer, strlen(buffer), 0) < 0) {
+        throw "error al recibir";
+    }
+    return buffer;
+}
+
 void Servidor::recibir_n() {
-    if(send(descriptor, &n, sizeof(int), 0) < 0) {
+    if(recv(otro_descriptor, &n, sizeof(int), 0) < 0) {
         throw "error al recibir n";
     }
 }
 
 void Servidor::ejecutar() {
-    size_t leido;
-    conectar();
-    recibir_n();
-    for(int i = 0; i < n; ++i) {
-        leido = archivo.lee(TAM_DGRAMA);
-        if(leido < TAM_DGRAMA) break;
-        recibir(archivo.get_contenido());
+    Archivo archivo;
+    char filename[42], buffer[TAM_DGRAMA];
+    while(1) {
+        aceptar();
+        recibir_n();
+        for(int i = 0; i < n; ++i) {
+            sprintf(filename, "%d.txt", i);
+            archivo = Archivo(filename, O_RDONLY);
+            buffer = recibir();
+            archivo.escribe(buffer, strlen(buffer));
+            archivos.push_back(archivo);
+        }
     }
 }
 
