@@ -1,4 +1,4 @@
-#include "cliente.h"
+#include "servidor.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -11,66 +11,58 @@
 #define SOCK_PATH "escritor_ipc"
 #define TAM_DGRAMA 100
 
-void Cliente::inicializar() {
+void Servidor::inicializar() {
     descriptor = socket(AF_UNIX, SOCK_DGRAM, 0);
     if(descriptor < 0) {
         throw "error al crear socket";
     }
 }
 
-Cliente::Cliente(const char *filename, unsigned int n) {
+Servidor::Servidor(const char *filename, unsigned int n) {
     archivo = Archivo(filename, O_RDONLY);
     this->n = n;
     inicializar();
 }
 
-Cliente::~Cliente() {
+Servidor::~Servidor() {
     archivo.cerrar();
     close(descriptor);
 }
 
-void Cliente::conectar() {
-    int len;
-    struct sockaddr_un remoto;
-    remoto.sun_family = AF_UNIX;
-    strcpy(remoto.sun_path, SOCK_PATH);
-    len = strlen(remoto.sun_path) + sizeof(remoto.sun_family);
-    if(connect(descriptor, (struct sockaddr*) &remoto, len) < 0) {
-        throw "error al conectar";
-    }
+void Servidor::conectar() {
 }
 
-void Cliente::enviar(char *str) {
+void Servidor::recibir(char *str) {
     if(send(descriptor, str, strlen(str), 0) < 0) {
-        throw "error al enviar";
+        throw "error al recibir";
     }
 }
-void Cliente::enviar_n() {
+void Servidor::recibir_n() {
     if(send(descriptor, &n, sizeof(int), 0) < 0) {
-        throw "error al enviar n";
+        throw "error al recibir n";
     }
 }
 
-void Cliente::ejecutar() {
+void Servidor::ejecutar() {
     size_t leido;
     conectar();
-    enviar_n();
+    recibir_n();
     for(int i = 0; i < n; ++i) {
         leido = archivo.lee(TAM_DGRAMA);
         if(leido < TAM_DGRAMA) break;
-        enviar(archivo.get_contenido());
+        recibir(archivo.get_contenido());
     }
 }
 
 int main(int argc, char const *argv[]) {
-    Cliente cliente;
-    if(argc != 3) {
-        printf("forma de uso: %s <filename> <n>\n", argv[0]);
+    Servidor servidor;
+    if(argc != 1) {
+        printf("no recibo parámetros\n", argv[0]);
         exit(-1);
     }
     try {
-        cliente = Cliente(argv[1], (unsigned int) atoi(argv[2]));
-        cliente.ejecutar();
+        servidor = Servidor();
+        servidor.ejecutar();
     } catch(char *msg) {
         perror(msg);
         printf("%s\n", msg);
