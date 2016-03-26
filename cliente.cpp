@@ -11,17 +11,13 @@
 #define SOCK_PATH "escritor_ipc"
 #define TAM_DGRAMA 100
 
-void Cliente::inicializar() {
+Cliente::Cliente(const char *filename, unsigned int n) :
+        archivo(filename, O_RDONLY) {
+    this->n = n;
     descriptor = socket(AF_UNIX, SOCK_DGRAM, 0);
     if(descriptor < 0) {
         throw "error al crear socket";
     }
-}
-
-Cliente::Cliente(const char *filename, unsigned int n) {
-    archivo = Archivo(filename, O_RDONLY);
-    this->n = n;
-    inicializar();
 }
 
 Cliente::~Cliente() {
@@ -63,13 +59,12 @@ void Cliente::ejecutar() {
 }
 
 int main(int argc, char const *argv[]) {
-    Cliente cliente;
     if(argc != 3) {
         printf("forma de uso: %s <filename> <n>\n", argv[0]);
         exit(-1);
     }
     try {
-        cliente = Cliente(argv[1], (unsigned int) atoi(argv[2]));
+        Cliente cliente(argv[1], (unsigned int) atoi(argv[2]));
         cliente.ejecutar();
     } catch(char *msg) {
         perror(msg);

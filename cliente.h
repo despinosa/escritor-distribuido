@@ -13,7 +13,6 @@ protected:
     int descriptor;
     unsigned int n;
     char *ruta;
-    void inicializar();
     void conectar();
     void enviar(char *str);
     void enviar_n();

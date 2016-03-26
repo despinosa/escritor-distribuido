@@ -1,7 +1,8 @@
-#ifndef CLIENTE_H
-#define CLIENTE_H
+#ifndef SERVIDOR_H
+#define SERVIDOR_H
 
 #include "archivo.h"
+#include <vector>
 
 using namespace std;
 
@@ -9,16 +10,16 @@ class Servidor {
 public:
     Servidor();
     ~Servidor();
-    void ejecutar();
+    void ejecutar(unsigned int repeticiones);
 protected:
     vector<Archivo> archivos;
     int mi_descriptor, otro_descriptor;
     unsigned int n;
-    char *ruta;
-    void inicializar();
+    char *ruta, *buffer;
     void aceptar();
-    string recibir(char *str);
+    char *recibir();
     void recibir_n();
+    char *palabra_aleatoria();
     void cerrar();
 };
 
