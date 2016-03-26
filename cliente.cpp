@@ -26,7 +26,7 @@ void Cliente::ejecutar() {
     size_t leido;
     conectar();
     enviar_n();
-    for (int i = 0; i < n; ++i) {
+    for(int i = 0; i < n; ++i) {
         leido = archivo.lee(TAM_DGRAMA);
         if (leido < TAM_DGRAMA) break;
         enviar(archivo.get_contenido());
@@ -41,6 +41,7 @@ void Cliente::inicializar() {
 }
 
 void Cliente::conectar() {
+    int len;
     struct sockaddr_un remoto;
     remoto.sun_family = AF_UNIX;
     strcpy(remoto.sun_path, SOCK_PATH);
@@ -51,12 +52,14 @@ void Cliente::conectar() {
 }
 
 void Cliente::enviar(char *str) {
-    if(send(descriptor, str, strlen(str), 0) > 0) {
+    if(send(descriptor, str, strlen(str), 0) < 0) {
         throw "error al enviar";
     }
 }
 void Cliente::enviar_n() {
-    send(descriptor, &n, sizeof(int), 0)
+    if(send(descriptor, &n, sizeof(int), 0) < 0) {
+        throw "error al enviar n";
+    }
 }
 
 int main(int argc, char const *argv[]) {
@@ -65,8 +68,14 @@ int main(int argc, char const *argv[]) {
         printf("forma de uso: %s <filename> <n>\n", argv[0]);
         exit(-1);
     }
-    cliente = Cliente(argv[1], (unsigned int) atoi(argv[2]));
-    cliente.ejecutar();
+    try {
+        cliente = Cliente(argv[1], (unsigned int) atoi(argv[2]));
+        cliente.ejecutar();
+    } catch(char *msg) {
+        perror(msg);
+        printf("%s\n", msg);
+        exit(-1);
+    }
     return 0;
 }
 
