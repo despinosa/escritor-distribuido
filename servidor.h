@@ -15,11 +15,11 @@ protected:
     vector<Archivo> archivos;
     int mi_descriptor, otro_descriptor;
     unsigned int n;
-    char *ruta, *buffer;
-    void aceptar();
-    char *recibir();
-    void recibir_n();
-    char *palabra_aleatoria();
+    char *ruta;
+    int aceptar();
+    void recibir(size_t nbytes, char *buffer);
+    int recibir_n();
+    void palabra_aleatoria(char *buffer, char *palabra);
     void cerrar();
 };
 

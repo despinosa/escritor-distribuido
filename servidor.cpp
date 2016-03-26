@@ -14,7 +14,6 @@
 Servidor::Servidor() {
     struct sockaddr_un local;
     size_t tam;
-    buffer = (char*) malloc(TAM_DGRAMA);
     mi_descriptor = socket(AF_UNIX, SOCK_DGRAM, 0);
     if(mi_descriptor < 0) {
         throw "error al crear socket";
@@ -35,7 +34,7 @@ Servidor::~Servidor() {
     close(mi_descriptor);
 }
 
-void Servidor::aceptar() {
+int Servidor::aceptar() {
     struct sockaddr_un remoto;
     socklen_t tam;
     tam = sizeof(remoto);
@@ -43,41 +42,43 @@ void Servidor::aceptar() {
     if (otro_descriptor < 0) {
         throw "error al aceptar";
     }
+    return otro_descriptor;
 }
 
-char* Servidor::recibir() {
-    if(recv(otro_descriptor, buffer, TAM_DGRAMA, 0) < 0) {
+void Servidor::recibir(size_t nbytes, char *buffer) {
+    if(recv(otro_descriptor, buffer, nbytes, 0) < 0) {
         throw "error al recibir";
     }
 }
 
-void Servidor::recibir_n() {
+int Servidor::recibir_n() {
     if(recv(otro_descriptor, &n, sizeof(int), 0) < 0) {
         throw "error al recibir n";
     }
+    return n;
 }
 
-char *Servidor::palabra_aleatoria() {
-    char *palabra;
+void Servidor::palabra_aleatoria(char *buffer, char *palabra) {
     palabra = strtok(buffer, " ");
     while(palabra != 0) {
-        if(rand() % 10 < 7) {
-            return palabra;
+        if(rand() % 10 < 2) {
+            return;
         }
         palabra = strtok(buffer, " ");
     }
+    palabra_aleatoria(buffer, palabra);
 }
 
 void Servidor::ejecutar(unsigned int repeticiones) {
-    char filename[42], *palabra;
+    char filename[42], palabra[42], buffer[TAM_DGRAMA+1];
     for (int i = 0; i < repeticiones; ++i) {
-        aceptar();
+        otro_descriptor = aceptar();
         recibir_n();
         for(int i = 0; i < n; ++i) {
             sprintf(filename, "%d.txt", i);
             archivos.push_back(Archivo(filename, O_RDONLY));
-            recibir();
-            palabra = palabra_aleatoria();
+            recibir(TAM_DGRAMA, buffer);
+            palabra_aleatoria(buffer, palabra);
             archivos.back().escribe(palabra, strlen(palabra));
             archivos.back().cerrar();
             close(otro_descriptor);

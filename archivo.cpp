@@ -19,7 +19,7 @@ Archivo::Archivo(const char *filename, int banderas, mode_t modo) {
 Archivo::~Archivo() {}
 
 size_t Archivo::lee(size_t nbytes) {
-    contenido = (char*) realloc(nbytes);
+    contenido = (char*) realloc(contenido, nbytes);
     return read(descriptor, contenido, nbytes);
 }
 
