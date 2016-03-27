@@ -3,6 +3,7 @@
 
 #include "archivo.h"
 #include <vector>
+#include <sys/un.h>
 
 using namespace std;
 
@@ -13,13 +14,14 @@ public:
     void ejecutar(unsigned int repeticiones);
 protected:
     vector<Archivo> archivos;
+    struct sockaddr_un local, remota;
     int descriptor;
     unsigned int n;
     char *ruta;
     int aceptar();
-    void recibir(size_t nbytes, char *buffer);
+    char *recibir(size_t nbytes);
     int recibir_n();
-    void palabra_aleatoria(char *buffer, char *palabra);
+    char *palabra_aleatoria(char *buffer);
     void cerrar();
 };
 

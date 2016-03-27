@@ -2,6 +2,7 @@
 #define CLIENTE_H
 
 #include "archivo.h"
+#include <sys/un.h>
 
 class Cliente {
 public:
@@ -10,6 +11,7 @@ public:
     void ejecutar();
 protected:
     Archivo archivo;
+    struct sockaddr_un local, remota;
     int descriptor;
     unsigned int n;
     char *ruta;
