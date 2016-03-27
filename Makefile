@@ -1,7 +1,7 @@
 all : run
 
 run : build
-	./servidor 1 & (sleep 2s ; ./cliente file.txt 5)
+	./servidor 1 & (sleep 1s ; ./cliente file.txt 5)
 
 build : servidor cliente
 

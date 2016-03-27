@@ -73,12 +73,11 @@ void Servidor::ejecutar(unsigned int repeticiones) {
     for (int i = 0; i < repeticiones; ++i) {
         recibir_n();
         for(int i = 0; i < n; ++i) {
-            sprintf(filename, "%d.txt", i);
+            sprintf(filename, "%d.txt", i+1);
             archivos.push_back(Archivo(filename, O_WRONLY | O_CREAT,
                                        777));
             buffer = recibir(TAM_DGRAMA);
             palabra = palabra_aleatoria(buffer);
-            printf("%s\n", palabra);
             archivos.back().escribe((const char*) palabra, strlen(palabra));
             archivos.back().cerrar();
         }
@@ -95,7 +94,6 @@ int main(int argc, char const *argv[]) {
         servidor.ejecutar(atoi(argv[1]));
     } catch(const char *msg) {
         perror(msg);
-        // printf("%s\n", msg);
         exit(-1);
     }
     return 0;

@@ -18,7 +18,6 @@ protected:
     int descriptor;
     unsigned int n;
     char *ruta;
-    int aceptar();
     char *recibir(size_t nbytes);
     int recibir_n();
     char *palabra_aleatoria(char *buffer);

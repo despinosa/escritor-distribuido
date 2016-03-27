@@ -85,7 +85,6 @@ int main(int argc, char const *argv[]) {
         cliente.ejecutar();
     } catch(const char *msg) {
         perror(msg);
-        // printf("%s\n", msg);
         exit(-1);
     }
     return 0;
