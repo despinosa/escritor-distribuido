@@ -87,15 +87,14 @@ void Servidor::ejecutar(unsigned int repeticiones) {
 }
 
 int main(int argc, char const *argv[]) {
-    Servidor servidor;
-    if(argc != 1) {
-        printf("no recibo parámetros\n");
+    if(argc != 2) {
+        printf("forma de uso: %s <repeticiones>\n", argv[0]);
         exit(-1);
     }
     try {
-        servidor = Servidor();
-        servidor.ejecutar(3);
-    } catch(char *msg) {
+        Servidor servidor;
+        servidor.ejecutar(atoi(argv[1]));
+    } catch(const char *msg) {
         perror(msg);
         printf("%s\n", msg);
         exit(-1);

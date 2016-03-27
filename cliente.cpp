@@ -66,7 +66,7 @@ int main(int argc, char const *argv[]) {
     try {
         Cliente cliente(argv[1], (unsigned int) atoi(argv[2]));
         cliente.ejecutar();
-    } catch(char *msg) {
+    } catch(const char *msg) {
         perror(msg);
         printf("%s\n", msg);
         exit(-1);
