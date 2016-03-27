@@ -13,7 +13,7 @@ public:
     void ejecutar(unsigned int repeticiones);
 protected:
     vector<Archivo> archivos;
-    int mi_descriptor, otro_descriptor;
+    int descriptor;
     unsigned int n;
     char *ruta;
     int aceptar();

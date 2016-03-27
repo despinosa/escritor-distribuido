@@ -14,45 +14,31 @@
 Servidor::Servidor() {
     struct sockaddr_un local;
     size_t tam;
-    mi_descriptor = socket(AF_UNIX, SOCK_DGRAM, 0);
-    if(mi_descriptor < 0) {
+    descriptor = socket(AF_UNIX, SOCK_DGRAM, 0);
+    if(descriptor < 0) {
         throw "error al crear socket";
     }
     local.sun_family = AF_UNIX;
     strcpy(local.sun_path, SOCK_PATH);
     unlink(local.sun_path);
     tam = strlen(local.sun_path) + sizeof(local.sun_family);
-    if (bind(mi_descriptor, (struct sockaddr *)&local, tam) < 0) {
+    if (bind(descriptor, (struct sockaddr *)&local, tam) < 0) {
         throw "error al registrar";
-    }
-    if (listen(mi_descriptor, 5) < 0) {
-        throw "error al escuchar";
     }
 }
 
 Servidor::~Servidor() {
-    close(mi_descriptor);
-}
-
-int Servidor::aceptar() {
-    struct sockaddr_un remoto;
-    socklen_t tam;
-    tam = sizeof(remoto);
-    otro_descriptor = accept(mi_descriptor, (struct sockaddr*) &remoto, &tam);
-    if (otro_descriptor < 0) {
-        throw "error al aceptar";
-    }
-    return otro_descriptor;
+    close(descriptor);
 }
 
 void Servidor::recibir(size_t nbytes, char *buffer) {
-    if(recv(otro_descriptor, buffer, nbytes, 0) < 0) {
+    if(recv(descriptor, buffer, nbytes, 0) < 0) {
         throw "error al recibir";
     }
 }
 
 int Servidor::recibir_n() {
-    if(recv(otro_descriptor, &n, sizeof(int), 0) < 0) {
+    if(recv(descriptor, &n, sizeof(int), 0) < 0) {
         throw "error al recibir n";
     }
     return n;
@@ -72,16 +58,17 @@ void Servidor::palabra_aleatoria(char *buffer, char *palabra) {
 void Servidor::ejecutar(unsigned int repeticiones) {
     char filename[42], palabra[42], buffer[TAM_DGRAMA+1];
     for (int i = 0; i < repeticiones; ++i) {
-        otro_descriptor = aceptar();
+        // descriptor = aceptar();
         recibir_n();
         for(int i = 0; i < n; ++i) {
             sprintf(filename, "%d.txt", i);
-            archivos.push_back(Archivo(filename, O_RDONLY));
+            archivos.push_back(Archivo(filename, O_WRONLY | O_CREAT,
+                                       O_WRONLY | S_IWUSR));
             recibir(TAM_DGRAMA, buffer);
             palabra_aleatoria(buffer, palabra);
             archivos.back().escribe(palabra, strlen(palabra));
             archivos.back().cerrar();
-            close(otro_descriptor);
+            close(descriptor);
         }
     }
 }
